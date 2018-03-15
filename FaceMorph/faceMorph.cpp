@@ -1,5 +1,6 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
+#include <opencv2/opencv.hpp>
 #include <iostream>
 #include <fstream>
 #include <iomanip>
@@ -13,7 +14,7 @@ using namespace std;
 vector<Point2f> readPoints(string pointsFileName)
 {
     vector<Point2f> points;
-    ifstream ifs(pointsFileName);
+    ifstream ifs(pointsFileName.c_str());
     float x, y;
     while(ifs >> x >> y)
     {
