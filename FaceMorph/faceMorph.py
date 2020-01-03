@@ -64,16 +64,28 @@ def morphTriangle(img1, img2, img, t1, t2, t, alpha) :
 
     # Alpha blend rectangular patches
     imgRect = (1.0 - alpha) * warpImage1 + alpha * warpImage2
-
-    # Copy triangular region of the rectangular patch to the output image
-    img[r[1]:r[1]+r[3], r[0]:r[0]+r[2]] = img[r[1]:r[1]+r[3], r[0]:r[0]+r[2]] * ( 1 - mask ) + imgRect * mask
-
+    #img[r[1]:r[1]+r[3], r[0]:r[0]+r[2]] = img[r[1]:r[1]+r[3], r[0]:r[0]+r[2]] * ( 1 - mask ) + imgRect * mask
+    try:
+        # Copy triangular region of the rectangular patch to the output image
+        #img[r[1]:r[1]+r[3], r[0]:r[0]+r[2]] = 0
+        #cv2.fillConvexPoly(img[r[1]:r[1]+r[3], r[0]:r[0]+r[2]], np.int32(tRect), (0, 0, 0), 16, 0);
+        img[r[1]:r[1]+r[3], r[0]:r[0]+r[2]] = img[r[1]:r[1]+r[3], r[0]:r[0]+r[2]] * ( 1 - mask ) + imgRect * mask
+    except:
+        print "error r:", r
+        print "error warpImage1:", warpImage1.shape
+        print "error warpImage2:", warpImage2.shape
+        print "error imgRect:", imgRect.shape
+        print "error mask:", mask.shape
+        pass
+    finally:
+        pass
 
 if __name__ == '__main__' :
 
-    filename1 = 'hillary_clinton.jpg'
-    filename2 = 'ted_cruz.jpg'
-    alpha = 0.5
+    filename1 = './test/cc02.jpg'
+    filename2 = 'aging80_2.jpg'
+    alpha = 0.3
+    alpha_02 = 0.1
     
     # Read images
     img1 = cv2.imread(filename1);
@@ -90,23 +102,27 @@ if __name__ == '__main__' :
 
     # Compute weighted average point coordinates
     for i in xrange(0, len(points1)):
-        x = ( 1 - alpha ) * points1[i][0] + alpha * points2[i][0]
-        y = ( 1 - alpha ) * points1[i][1] + alpha * points2[i][1]
+        x = ( 1 - alpha_02 ) * points1[i][0] + alpha_02 * points2[i][0]
+        y = ( 1 - alpha_02 ) * points1[i][1] + alpha_02 * points2[i][1]
         points.append((x,y))
 
 
     # Allocate space for final output
+    print "img1.dtype:", img1.dtype, img1.shape
     imgMorph = np.zeros(img1.shape, dtype = img1.dtype)
+    #imgMorph = img1
+    #imgMorph = np.float32(imgMorph)
 
     # Read triangles from tri.txt
-    with open("tri.txt") as file :
+    triFileName = "tri_120.txt"
+    with open(triFileName) as file :
         for line in file :
             x,y,z = line.split()
             
             x = int(x)
             y = int(y)
             z = int(z)
-            
+            print "x,y,z:", x,y,z           
             t1 = [points1[x], points1[y], points1[z]]
             t2 = [points2[x], points2[y], points2[z]]
             t = [ points[x], points[y], points[z] ]
@@ -117,4 +133,5 @@ if __name__ == '__main__' :
 
     # Display Result
     cv2.imshow("Morphed Face", np.uint8(imgMorph))
+    cv2.imwrite(triFileName + ".jpg", np.uint8(imgMorph))
     cv2.waitKey(0)
